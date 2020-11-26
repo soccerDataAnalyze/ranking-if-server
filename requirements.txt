@@ -1,0 +1,8 @@
+selenium
+pymongo
+dnspython
+Flask
+uuid
+neo4j
+gunicorn
+flask-cors
