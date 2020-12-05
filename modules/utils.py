@@ -1,77 +1,195 @@
 #! /usr/bin/env python3
 # coding: utf-8
 
-def get_winner_between(goals, from_min, to_min):
+
+class GoalValidator:
+    def __init__(self):
+        self.constraints = []
+
+    def add_constraint(self, constraint):
+        self.constraints.append(constraint)
+
+    def validate(self, goal):
+        valid = True
+        
+        if goal['minute'] == " " or goal['minute'] == "":
+            return False
+        
+        goal['minute'] = int(goal['minute'])
+        for constraint in self.constraints:
+            ref = None
+            if type(constraint['ref']) == str:
+                ref = "'{}'".format(constraint['ref'])
+                
+            else:
+                ref = constraint['ref']
+
+            field = None
+            if type(goal[constraint['field']]) == str:
+                field = "'{}'".format(goal[constraint['field']])
+                
+            else:
+                field = goal[constraint['field']]
+            
+            eval_string = "{}{}{}".format(field,
+                                          constraint['condition'],
+                                          ref)
+
+            if not eval(eval_string):
+                valid = False
+                break
+        
+        return valid
+    
+
+def get_winner(goals, validator):
     
     """"Compute the winner of an interval of 
         the match between two minutes
 
         :param goals: list of dict with goal data
-        :param from_min: first minute of the interval
-        :param to_min: last minute of the interval
+        :param validator: validator object to validate goals
         :return: string representing the winner"""
 
-    teams_goals = {'home': 0, 'away': 0}
-    for goal in goals:
-        if goal['min'] >= from_min and goal['min'] <= to_min:
-            teams_goals[goal['team']] += 1
+    score = {'home': 0, 'away': 0}
+
+    for team in score.keys():
+        for goal in goals[team]:
+            if validator.validate(goal):
+                score[team] += 1
 
     winner = ''
-    if teams_goals['home'] > teams_goals['away']:
+    if score['home'] > score['away']:
         winner = 'home'
     
-    elif teams_goals['away'] > teams_goals['home']:
+    elif score['away'] > score['home']:
         winner = 'away'
 
     else:
         winner = 'draw'
 
-    return winner
+    result = {'winner': winner, 'score': score}
+    
+    return result
 
 
-def get_points_between(matchs, from_min, to_min):
+def get_points(matchs, validator):
 
-    """"Compute the points that the teams in the
-        matchs dicts have taken between two minutes
+    """"Compute the points and other data that the teams in the
+        matchs dicts have taken under some constraints
 
         :param matchs: list of dict with matchs data
-        :param from_min: first minute of the interval
-        :param to_min: last minute of the interval
+        :param validator: validator object to validate goals
         :return: list of dicts with points for each team"""
 
     teams = [team for match in matchs for team in match['teams'].values()]
     teams = list(set(teams))
-    points_by_team = [{'team': team, 'points': 0} for team in teams]
+    points_by_team = [{'team': team, 'points': 0, 'victory': 0, 
+                       'draw': 0, 'defeat': 0, 'gf': 0, 'ga': 0} for team in teams]
 
     for match in matchs:
-        winner = get_winner_between(match['goals'], from_min, to_min)
-        if winner == 'draw':
-            i_home_team = next((i for (i, t) in enumerate(points_by_team) 
-                                if t["team"] == match['teams']['home']), None)
-            i_away_team = next((i for (i, t) in enumerate(points_by_team) 
-                                if t["team"] == match['teams']['away']), None)
-            points_by_team[i_home_team]['points'] += 1
-            points_by_team[i_away_team]['points'] += 1
+        result = get_winner(match['goals'], validator)
+        winner = result['winner']
+        score = result['score']
 
-        else:
-            i_team = next((i for (i, t) in enumerate(points_by_team) 
-                           if t["team"] == match['teams'][winner]), None)
-            points_by_team[i_team]['points'] += 3
+        i_home_team = next((i for (i, t) in enumerate(points_by_team) 
+                            if t["team"] == match['teams']['home']), None)
+        i_away_team = next((i for (i, t) in enumerate(points_by_team) 
+                            if t["team"] == match['teams']['away']), None)
+
+        points_by_team[i_home_team]['gf'] += score['home']
+        points_by_team[i_home_team]['ga'] += score['away']
+        points_by_team[i_away_team]['gf'] += score['away']
+        points_by_team[i_away_team]['ga'] += score['home']
+
+        if winner == 'draw':
+            points_by_team[i_home_team]['points'] += 1
+            points_by_team[i_home_team]['draw'] += 1
+            points_by_team[i_away_team]['points'] += 1
+            points_by_team[i_away_team]['draw'] += 1
+
+        elif winner == 'home':
+            points_by_team[i_home_team]['points'] += 3
+            points_by_team[i_home_team]['victory'] += 1
+            points_by_team[i_away_team]['defeat'] += 1
+
+        elif winner == 'away':
+            points_by_team[i_away_team]['points'] += 3
+            points_by_team[i_away_team]['victory'] += 1
+            points_by_team[i_home_team]['defeat'] += 1
 
     return points_by_team
 
 
-def get_ranking(points):
+def get_ranking(data, keys):
 
-    """From a dict with the points for each 
-       teams, compute the ranking
+    """From a dict with the data compute the ranking
 
-       :param points: a dict with the point for each team
+       :param data: a dict with the data to rank
+       :param keys: keys in order of importance to rank
        :return: a list with the ranking"""
 
-    ranking = sorted(points, key=lambda t: t['points'], reverse=True)
+    
+    ranking = sorted(data, key=lambda t: [t[k] for k in keys], reverse=True)
 
-    return ranking 
+    return ranking
+
+
+def get_goals_by_player(matchs, validator):
+
+    """"Compute the winner of an interval of 
+        the match between two minutes
+
+        :param matchs: list of dict with matchs data
+        :param validator: validator object to validate goals
+        :return: dict with number of goals for each player"""
+
+    tmp = {}
+    for match in matchs:
+        for team in ['home', 'away']:
+            for goal in match['goals'][team]:
+                if validator.validate(goal):
+                    if goal['scorer'] not in tmp.keys():
+                        tmp[goal['scorer']] = 1
+                    else:
+                        tmp[goal['scorer']] += 1
+    
+    goals_by_player = []
+
+    for player, goals in tmp.items():
+        goals_by_player.append({'player': player, 
+                                'goals': goals})
+
+    return goals_by_player
+
+
+
+def get_assists_by_player(matchs, validator):
+
+    """"Compute the winner of an interval of 
+        the match between two minutes
+
+        :param matchs: list of dict with matchs data
+        :param validator: validator object to validate goals
+        :return: dict with number of goals for each player"""
+
+    tmp = {}
+    for match in matchs:
+        for team in ['home', 'away']:
+            for goal in match['goals'][team]:
+                if validator.validate(goal) and goal['assister'] != 'None':
+                    if goal['assister'] not in tmp.keys():
+                        tmp[goal['assister']] = 1
+                    else:
+                        tmp[goal['assister']] += 1
+    
+    assists_by_player = []
+
+    for player, assists in tmp.items():
+        assists_by_player.append({'player': player, 
+                                  'assists': assists})
+
+    return assists_by_player
 
     
 
