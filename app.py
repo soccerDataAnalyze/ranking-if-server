@@ -111,5 +111,16 @@ def get_clean_sheet_ranking():
     return jsonify({'ranking' : ranking })
 
 
+@app.route('/api/v1.0/ranking_evolution/', methods=['POST'])
+def get_ranking_evolution():
+
+    team = request.get_json()['team']
+    matchs = get_matchs()
+    
+    evolution = utils.get_ranking_evolution(matchs, team)
+
+    return jsonify({'evolution' : evolution })
+
+
 if __name__ == '__main__':
     app.run(debug=True)

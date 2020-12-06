@@ -221,6 +221,36 @@ def get_clean_sheets(matchs, validator):
     return cs_by_team
 
 
+def get_ranking_evolution(matchs, team):
+
+    """Get the ranking evolution of a team
+
+    :param matchs: list of dict with matchs data
+    :param team: the name of the team
+    :return: list with position for each minute"""
+
+    ranking_evolution = []
+    for to_min in range(5, 95, 5):
+        validator = GoalValidator()
+        validator.add_constraint({'field': 'minute', 
+                                'condition': '>', 
+                                'ref': 0})
+        validator.add_constraint({'field': 'minute', 
+                                'condition': '<', 
+                                'ref': to_min})
+        
+        points = get_points(matchs, validator)
+        ranking = get_ranking(points, ['points', 'gf'])
+
+        pos = next((i for (i, d) in enumerate(ranking) if d["team"] == team), None)
+
+        ranking_evolution.append(pos)
+
+    return ranking_evolution
+        
+
+
+
 
 
     
