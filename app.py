@@ -97,5 +97,19 @@ def get_assister_ranking():
     return jsonify({'ranking' : ranking })
 
 
+@app.route('/api/v1.0/clean_sheet_ranking/', methods=['POST'])
+def get_clean_sheet_ranking():
+
+    constraints = request.get_json()
+    matchs = get_matchs()
+    validator = get_validator(constraints)
+    
+    # compute ranking
+    clean_sheets = utils.get_clean_sheets(matchs, validator)
+    ranking = utils.get_ranking(clean_sheets, ['clean_sheets'])
+
+    return jsonify({'ranking' : ranking })
+
+
 if __name__ == '__main__':
     app.run(debug=True)

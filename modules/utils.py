@@ -191,6 +191,38 @@ def get_assists_by_player(matchs, validator):
 
     return assists_by_player
 
+
+def get_clean_sheets(matchs, validator):
+
+    """Compute the number of clean sheets for 
+       each teams
+
+    :param matchs: list of dict with matchs data
+    :param validator: validator object to validate goals
+    :return: dict with number of clean sheets for each team"""
+
+    teams = [team for match in matchs for team in match['teams'].values()]
+    teams = list(set(teams))
+    cs_by_team = [{'team': team, 'clean_sheets': 0} for team in teams]
+
+    for match in matchs:
+
+        i_home_team = next((i for (i, t) in enumerate(cs_by_team) 
+                            if t["team"] == match['teams']['home']), None)
+        i_away_team = next((i for (i, t) in enumerate(cs_by_team) 
+                            if t["team"] == match['teams']['away']), None)
+
+        if len(match['goals']['home']) == 0:
+            cs_by_team[i_away_team]['clean_sheets'] += 1
+
+        if len(match['goals']['away']) == 0:
+            cs_by_team[i_home_team]['clean_sheets'] += 1
+
+    return cs_by_team
+
+
+
+
     
 
 
