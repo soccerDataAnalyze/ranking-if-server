@@ -73,13 +73,14 @@ def get_winner(goals, validator):
     return result
 
 
-def get_points(matchs, validator):
+def get_points(matchs, validator, loc_filter="general"):
 
     """"Compute the points and other data that the teams in the
         matchs dicts have taken under some constraints
 
         :param matchs: list of dict with matchs data
         :param validator: validator object to validate goals
+        :param loc_filter: filter points from home, away or both match 
         :return: list of dicts with points for each team"""
 
     teams = [team for match in matchs for team in match['teams'].values()]
@@ -97,26 +98,38 @@ def get_points(matchs, validator):
         i_away_team = next((i for (i, t) in enumerate(points_by_team) 
                             if t["team"] == match['teams']['away']), None)
 
-        points_by_team[i_home_team]['gf'] += score['home']
-        points_by_team[i_home_team]['ga'] += score['away']
-        points_by_team[i_away_team]['gf'] += score['away']
-        points_by_team[i_away_team]['ga'] += score['home']
+        if loc_filter == "general" or loc_filter == "home":
+            points_by_team[i_home_team]['gf'] += score['home']
+            points_by_team[i_away_team]['ga'] += score['home']
+
+        if loc_filter == "general" or loc_filter == "away":        
+            points_by_team[i_away_team]['gf'] += score['away']
+            points_by_team[i_home_team]['ga'] += score['away']
 
         if winner == 'draw':
-            points_by_team[i_home_team]['points'] += 1
-            points_by_team[i_home_team]['draw'] += 1
-            points_by_team[i_away_team]['points'] += 1
-            points_by_team[i_away_team]['draw'] += 1
+            if loc_filter == "general" or loc_filter == "home":
+                points_by_team[i_home_team]['points'] += 1
+                points_by_team[i_home_team]['draw'] += 1
+
+            if loc_filter == "general" or loc_filter == "away":
+                points_by_team[i_away_team]['points'] += 1
+                points_by_team[i_away_team]['draw'] += 1
 
         elif winner == 'home':
-            points_by_team[i_home_team]['points'] += 3
-            points_by_team[i_home_team]['victory'] += 1
-            points_by_team[i_away_team]['defeat'] += 1
+            if loc_filter == "general" or loc_filter == "home":
+                points_by_team[i_home_team]['points'] += 3
+                points_by_team[i_home_team]['victory'] += 1
+
+            if loc_filter == "general" or loc_filter == "away":
+                points_by_team[i_away_team]['defeat'] += 1
 
         elif winner == 'away':
-            points_by_team[i_away_team]['points'] += 3
-            points_by_team[i_away_team]['victory'] += 1
-            points_by_team[i_home_team]['defeat'] += 1
+            if loc_filter == "general" or loc_filter == "away":
+                points_by_team[i_away_team]['points'] += 3
+                points_by_team[i_away_team]['victory'] += 1
+
+            if loc_filter == "general" or loc_filter == "home":
+                points_by_team[i_home_team]['defeat'] += 1
 
     return points_by_team
 
@@ -229,7 +242,7 @@ def get_ranking_evolution(matchs, team):
     :param team: the name of the team
     :return: list with position for each minute"""
 
-    ranking_evolution = []
+    ranking_evolution = {'general': [], 'home': [], 'away': []}
     for to_min in range(1, 91):
         validator = GoalValidator()
         validator.add_constraint({'field': 'minute', 
@@ -239,12 +252,12 @@ def get_ranking_evolution(matchs, team):
                                 'condition': '<', 
                                 'ref': to_min})
         
-        points = get_points(matchs, validator)
-        ranking = get_ranking(points, ['points', 'gf'])
 
-        pos = next((i for (i, d) in enumerate(ranking) if d["team"] == team), None)
-
-        ranking_evolution.append(pos)
+        for ranking_type in ['general', 'home', 'away']:
+            points = get_points(matchs, validator, ranking_type)
+            ranking = get_ranking(points, ['points', 'gf'])
+            pos = next((i for (i, d) in enumerate(ranking) if d["team"] == team), None)
+            ranking_evolution[ranking_type].append(pos)
 
     return ranking_evolution
         

@@ -9,14 +9,14 @@ from modules.utils import *
 goals_A = {
     'home': [
         {
-            'min': 12,
+            'minute': 12,
             'scorer': 'player_A',
             'assister': 'player_B',
             'body_part': 'left',
             'situation': 'open play'   
         },
         {
-            'min': 72,
+            'minute': 72,
             'scorer': 'player_A',
             'assister': 'player_C',
             'body_part': 'left',
@@ -24,14 +24,14 @@ goals_A = {
         }],
     'away': [
         {
-            'min': 25,
+            'minute': 25,
             'scorer': 'player_D',
             'assister': 'player_E',
             'body_part': 'head',
             'situation': 'open play'   
         },
         {
-            'min': 83,
+            'minute': 83,
             'scorer': 'player_D',
             'assister': 'player_E',
             'body_part': 'right',
@@ -42,7 +42,7 @@ goals_A = {
 goals_B = {
     'home': [
         {
-            'min': 32,
+            'minute': 32,
             'scorer': 'player_F',
             'assister': 'player_B',
             'body_part': 'right',
@@ -50,7 +50,7 @@ goals_B = {
         }],
     'away': [
         {
-            'min': 38,
+            'minute': 38,
             'scorer': 'player_A',
             'assister': 'None',
             'body_part': 'left',
@@ -59,14 +59,14 @@ goals_B = {
 } 
 
 validator_A = GoalValidator()
-validator_A.add_constraint({'field': 'min', 'condition': '>', 'ref': 10})
-validator_A.add_constraint({'field': 'min', 'condition': '<', 'ref': 70})
+validator_A.add_constraint({'field': 'minute', 'condition': '>', 'ref': 10})
+validator_A.add_constraint({'field': 'minute', 'condition': '<', 'ref': 70})
 validator_A.add_constraint({'field': 'body_part', 'condition': '==', 'ref': 'left'})
 validator_A.add_constraint({'field': 'situation', 'condition': '==', 'ref': 'open play'})
 
 validator_B = GoalValidator()
-validator_B.add_constraint({'field': 'min', 'condition': '>', 'ref': 19})
-validator_B.add_constraint({'field': 'min', 'condition': '<', 'ref': 87})
+validator_B.add_constraint({'field': 'minute', 'condition': '>', 'ref': 19})
+validator_B.add_constraint({'field': 'minute', 'condition': '<', 'ref': 87})
 validator_B.add_constraint({'field': 'body_part', 'condition': '==', 'ref': 'right'})
 
 test_values = [(goals_A, validator_A, {'winner': 'home', 
