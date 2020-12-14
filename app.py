@@ -55,50 +55,47 @@ def get_validator(constraints):
 
 
 
-@app.route('/api/v1.0/team_ranking/', methods=['POST'])
-def get_team_ranking():
+@app.route('/api/v1.0/team_rankings/', methods=['POST'])
+def get_team_rankings():
 
     constraints = request.get_json()
     matchs = get_matchs()
     validator = get_validator(constraints)
     
-    # compute ranking
-    points = utils.get_points(matchs, validator)
-    ranking = utils.get_ranking(points, ['points', 'gf'])
+    # compute rankings
+    rankings = utils.get_team_rankings(matchs, validator)
 
-    return jsonify({'ranking' : ranking })
-
-
-@app.route('/api/v1.0/scorer_ranking/', methods=['POST'])
-def get_scorer_ranking():
-
-    constraints = request.get_json()
-    matchs = get_matchs()
-    validator = get_validator(constraints)
-    
-    # compute ranking
-    goals_by_player = utils.get_goals_by_player(matchs, validator)
-    ranking = utils.get_ranking(goals_by_player, ['goals'])
-
-    return jsonify({'ranking' : ranking })
+    return jsonify({'rankings' : rankings })
 
 
-@app.route('/api/v1.0/assister_ranking/', methods=['POST'])
-def get_assister_ranking():
+@app.route('/api/v1.0/scorer_rankings/', methods=['POST'])
+def get_scorer_rankings():
 
     constraints = request.get_json()
     matchs = get_matchs()
     validator = get_validator(constraints)
     
-    # compute ranking
-    assists_by_player = utils.get_assists_by_player(matchs, validator)
-    ranking = utils.get_ranking(assists_by_player, ['assists'])
+    # compute rankings
+    rankings = utils.get_scorer_rankings(matchs, validator)
 
-    return jsonify({'ranking' : ranking })
+    return jsonify({'rankings' : rankings })
 
 
-@app.route('/api/v1.0/clean_sheet_ranking/', methods=['POST'])
-def get_clean_sheet_ranking():
+@app.route('/api/v1.0/assister_rankings/', methods=['POST'])
+def get_assister_rankings():
+
+    constraints = request.get_json()
+    matchs = get_matchs()
+    validator = get_validator(constraints)
+    
+    # compute rankings
+    rankings = utils.get_assister_rankings(matchs, validator)
+
+    return jsonify({'rankings' : rankings })
+
+
+@app.route('/api/v1.0/clean_sheet_rankings/', methods=['POST'])
+def get_clean_sheet_rankings():
 
     constraints = request.get_json()
     matchs = get_matchs()
@@ -111,8 +108,8 @@ def get_clean_sheet_ranking():
     return jsonify({'ranking' : ranking })
 
 
-@app.route('/api/v1.0/ranking_evolution/', methods=['POST'])
-def get_ranking_evolution():
+@app.route('/api/v1.0/rankings_evolution/', methods=['POST'])
+def get_rankings_evolution():
 
     team = request.get_json()['team']
     matchs = get_matchs()
