@@ -118,5 +118,16 @@ def get_rankings_evolution():
     return jsonify({'evolution' : evolution })
 
 
+@app.route('/api/v1.0/teams/', methods=['GET'])
+def get_teams():
+
+    matchs = get_matchs()
+    
+    teams = utils.get_teams(matchs)
+
+    return jsonify({'teams' : teams})
+
+
+
 if __name__ == '__main__':
     app.run(debug=True)

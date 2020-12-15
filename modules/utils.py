@@ -328,6 +328,21 @@ def get_ranking_evolution(matchs, team):
             ranking_evolution[ranking_type].append(pos)
 
     return ranking_evolution
+
+
+def get_teams(matchs):
+
+    """Get the names of all the teams in a list
+       of matchs.
+
+    :param matchs: list of dict with matchs data
+    :return: list with the teams names"""
+
+    teams = [team for match in matchs for team in match['teams'].values()]
+    teams = list(set(teams))
+
+    return teams
+
         
 
 
