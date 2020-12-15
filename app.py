@@ -101,11 +101,10 @@ def get_clean_sheet_rankings():
     matchs = get_matchs()
     validator = get_validator(constraints)
     
-    # compute ranking
-    clean_sheets = utils.get_clean_sheets(matchs, validator)
-    ranking = utils.get_ranking(clean_sheets, ['clean_sheets'])
+    # compute rankings
+    rankings = utils.get_clean_sheet_rankings(matchs, validator)
 
-    return jsonify({'ranking' : ranking })
+    return jsonify({'rankings' : rankings })
 
 
 @app.route('/api/v1.0/rankings_evolution/', methods=['POST'])

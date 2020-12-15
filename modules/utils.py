@@ -253,13 +253,13 @@ def get_assister_rankings(matchs, validator):
 
     for ranking_type in ['all', 'home', 'away']:
         assists_by_player = get_assists_by_player(matchs, validator, ranking_type)
-        ranking = get_ranking(goals_by_player, ['assists'])
+        ranking = get_ranking(assists_by_player, ['assists'])
         rankings[ranking_type] = ranking
 
     return rankings
 
 
-def get_clean_sheets(matchs, validator):
+def get_clean_sheets(matchs, validator, loc_filter="all"):
 
     """Compute the number of clean sheets for 
        each teams
@@ -279,13 +279,27 @@ def get_clean_sheets(matchs, validator):
         i_away_team = next((i for (i, t) in enumerate(cs_by_team) 
                             if t["team"] == match['teams']['away']), None)
 
-        if len(match['goals']['home']) == 0:
-            cs_by_team[i_away_team]['clean_sheets'] += 1
+        if loc_filter == "all" or loc_filter == "home":
+            if len(match['goals']['home']) == 0:
+                cs_by_team[i_away_team]['clean_sheets'] += 1
 
-        if len(match['goals']['away']) == 0:
-            cs_by_team[i_home_team]['clean_sheets'] += 1
+        if loc_filter == "all" or loc_filter == "away":
+            if len(match['goals']['away']) == 0:
+                cs_by_team[i_home_team]['clean_sheets'] += 1
 
     return cs_by_team
+
+
+def get_clean_sheet_rankings(matchs, validator):
+
+    rankings = {'all': [], 'home': [], 'away': []}
+
+    for ranking_type in ['all', 'home', 'away']:
+        clean_sheets = get_clean_sheets(matchs, validator, ranking_type)
+        ranking = get_ranking(clean_sheets, ['clean_sheets'])
+        rankings[ranking_type] = ranking
+
+    return rankings
 
 
 def get_ranking_evolution(matchs, team):
