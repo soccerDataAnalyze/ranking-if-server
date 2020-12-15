@@ -310,7 +310,7 @@ def get_ranking_evolution(matchs, team):
     :param team: the name of the team
     :return: list with position for each minute"""
 
-    ranking_evolution = {'general': [], 'home': [], 'away': []}
+    ranking_evolution = {'all': [], 'home': [], 'away': []}
     for to_min in range(1, 91):
         validator = GoalValidator()
         validator.add_constraint({'field': 'minute', 
