@@ -16,14 +16,14 @@ cors = CORS(app, resources={r"*": {"origins": "*"}})
 app.config['CORS_HEADERS'] = 'Content-Type'
 
 
-def get_matchs():
+def get_matchs(championship):
 
     # get data from database 
     CONNECTION_STRING = "mongodb+srv://amaury:ObNw8j6guIlWAeuG@cluster0.ffeme.mongodb.net/rankinator?retryWrites=true&w=majority"
     client = pymongo.MongoClient(CONNECTION_STRING)
 
     db = client.rankinator
-    collection = db.matchs
+    collection = db['championship']
 
     cursor = collection.find({})
     matchs = []
@@ -58,8 +58,10 @@ def get_validator(constraints):
 @app.route('/api/v1.0/team_rankings/', methods=['POST'])
 def get_team_rankings():
 
-    constraints = request.get_json()
-    matchs = get_matchs()
+    params = request.get_json()
+    constraints = params['constraints']
+    championship = param['championship']
+    matchs = get_matchs(championship)
     validator = get_validator(constraints)
     
     # compute rankings
@@ -71,8 +73,10 @@ def get_team_rankings():
 @app.route('/api/v1.0/scorer_rankings/', methods=['POST'])
 def get_scorer_rankings():
 
-    constraints = request.get_json()
-    matchs = get_matchs()
+    params = request.get_json()
+    constraints = params['constraints']
+    championship = param['championship']
+    matchs = get_matchs(championship)
     validator = get_validator(constraints)
     
     # compute rankings
@@ -84,8 +88,10 @@ def get_scorer_rankings():
 @app.route('/api/v1.0/assister_rankings/', methods=['POST'])
 def get_assister_rankings():
 
-    constraints = request.get_json()
-    matchs = get_matchs()
+    params = request.get_json()
+    constraints = params['constraints']
+    championship = param['championship']
+    matchs = get_matchs(championship)
     validator = get_validator(constraints)
     
     # compute rankings
@@ -97,8 +103,10 @@ def get_assister_rankings():
 @app.route('/api/v1.0/clean_sheet_rankings/', methods=['POST'])
 def get_clean_sheet_rankings():
 
-    constraints = request.get_json()
-    matchs = get_matchs()
+    params = request.get_json()
+    constraints = params['constraints']
+    championship = param['championship']
+    matchs = get_matchs(championship)
     validator = get_validator(constraints)
     
     # compute rankings
@@ -110,8 +118,10 @@ def get_clean_sheet_rankings():
 @app.route('/api/v1.0/rankings_evolution/', methods=['POST'])
 def get_rankings_evolution():
 
-    team = request.get_json()['team']
-    matchs = get_matchs()
+    params = request.get_json()
+    team = params['team']
+    championship = param['championship']
+    matchs = get_matchs(championship)
     
     evolution = utils.get_ranking_evolution(matchs, team)
 
@@ -121,7 +131,9 @@ def get_rankings_evolution():
 @app.route('/api/v1.0/teams/', methods=['GET'])
 def get_teams():
 
-    matchs = get_matchs()
+    params = request.get_json()
+    championship = param['championship']
+    matchs = get_matchs(championship)
     
     teams = utils.get_teams(matchs)
 
