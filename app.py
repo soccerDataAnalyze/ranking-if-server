@@ -23,7 +23,7 @@ def get_matchs(championship):
     client = pymongo.MongoClient(CONNECTION_STRING)
 
     db = client.rankinator
-    collection = db['championship']
+    collection = db[championship]
 
     cursor = collection.find({})
     matchs = []
@@ -60,7 +60,7 @@ def get_team_rankings():
 
     params = request.get_json()
     constraints = params['constraints']
-    championship = param['championship']
+    championship = params['championship']
     matchs = get_matchs(championship)
     validator = get_validator(constraints)
     
@@ -75,7 +75,7 @@ def get_scorer_rankings():
 
     params = request.get_json()
     constraints = params['constraints']
-    championship = param['championship']
+    championship = params['championship']
     matchs = get_matchs(championship)
     validator = get_validator(constraints)
     
@@ -90,7 +90,7 @@ def get_assister_rankings():
 
     params = request.get_json()
     constraints = params['constraints']
-    championship = param['championship']
+    championship = params['championship']
     matchs = get_matchs(championship)
     validator = get_validator(constraints)
     
@@ -105,7 +105,7 @@ def get_clean_sheet_rankings():
 
     params = request.get_json()
     constraints = params['constraints']
-    championship = param['championship']
+    championship = params['championship']
     matchs = get_matchs(championship)
     validator = get_validator(constraints)
     
@@ -120,7 +120,7 @@ def get_rankings_evolution():
 
     params = request.get_json()
     team = params['team']
-    championship = param['championship']
+    championship = params['championship']
     matchs = get_matchs(championship)
     
     evolution = utils.get_ranking_evolution(matchs, team)
@@ -132,7 +132,8 @@ def get_rankings_evolution():
 def get_teams():
 
     params = request.get_json()
-    championship = param['championship']
+    championship = params['championship']
+    print(championship)
     matchs = get_matchs(championship)
     
     teams = utils.get_teams(matchs)
